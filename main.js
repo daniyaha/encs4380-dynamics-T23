@@ -7,9 +7,9 @@
   const stepSection = document.getElementById('stepSection');
   const rampSection = document.getElementById('rampSection');
 
-  // 801 points from 0 to 8*tau
+  // 801 points from 0 to max(10 s, 8*tau)
   function makeTime(tau) {
-    const N = 801, tEnd = 8 * tau;
+      const N = 801, tEnd = Math.max(10, 8 * tau);
     return Array.from({ length: N }, (_, i) => (i * tEnd) / (N - 1));
   }
 

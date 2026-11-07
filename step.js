@@ -39,17 +39,6 @@ function updateStep(K, timeConstant, t) {
 
     Plotly.react( "stepPlot", [inputTrace, outputTrace, point63, point95], layout, { responsive: true, displaylogo: false });
 
-    // Steady-state value, displayed separately from the graph.
-    const finalValueBox = document.getElementById("finalValue");
-    if (finalValueBox) {
-        finalValueBox.innerHTML = `
-            <div>
-                <div class="metric-label">Final value (KA)</div>
-                <div class="metric-note">Steady-state step output</div>
-            </div>
-            <div class="metric-number">${finalValue.toFixed(3)}</div>
-        `;
-    }
 
     // Validation: 63.2% and 95% are rounded lecture values,
     const expected63 = 0.632 * finalValue;

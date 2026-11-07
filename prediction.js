@@ -6,8 +6,6 @@ function initPrediction() {
     let savedAnswer = null;
 
     box.innerHTML = `
-        <h2>Predict, then check</h2>
-
         <p>
             If you increase τ, will the sensor respond
             faster or slower?
@@ -78,13 +76,22 @@ function initPrediction() {
             ? "Correct!"
             : "Not quite.";
 
+
+        
+
+        const isRamp = document.querySelector('input[name="inputType"]:checked').value === "ramp";
+        const explanation = isRamp
+            ? "the time lag (τ) and the steady-state error (Kτ) both grow."
+            : "the error decreases more slowly, and the ln(error) slope becomes less negative.";
+
         result.textContent =
             feedback + " τ increased from " +
             startingTau.toFixed(1) + " s to " +
             currentTau.toFixed(1) +
             " s. A larger τ means a slower response: " +
-            "the error decreases more slowly, and the ln(error) " +
-            "slope becomes less negative.";
+            explanation;
+        
+
 
         check.disabled = true;
     });

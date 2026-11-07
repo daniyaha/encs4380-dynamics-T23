@@ -32,10 +32,7 @@ function updateError(K, tau, t) {
         name: "ln(Error fraction)",
         line: { color: "green" }
     }], {
-        title: {
-            text: "ln(Error Fraction) — Slope = "
-                + (-1 / tau).toFixed(3) + " s⁻¹"
-        },
+            title: { text: "ln(Error Fraction)" },
         xaxis: { title: { text: "Time (s)" } },
         yaxis: { title: { text: "ln(Error fraction)" } },
         margin: { t: 60, b: 60, l: 80, r: 30 }

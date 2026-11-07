@@ -22,7 +22,6 @@ function updateRamp(K, tau, t) {
 
   const traces = [
     { x: times, y: x,   name: 'x(t) = t (input)', line: { dash: 'dot', color: '#888' } },
-    { x: times, y: ref, name: 'Kx(t) (reference)', line: { color: '#2a9d8f' } },
     { x: times, y: y,   name: 'y(t) (output)',     line: { color: '#e63946', width: 3 } },
     { x: times, y: lag, name: 'K(t − τ) (asymptote)', line: { dash: 'dash', color: '#f4a261' } }
   ];
@@ -45,12 +44,41 @@ function updateRamp(K, tau, t) {
     document.getElementById('rampPlot').insertAdjacentElement('afterend', info);
   }
   const finalErr = err[err.length - 1];
+  const tEnd     = times[times.length - 1];
+  const yEnd     = y[y.length - 1];
+
+  // Quantities read from the plotted curve at the end time
+  const measuredLag = tEnd - yEnd / K;   // how many seconds y trails the input
+  const rows = [
+    { label: 'Time lag (s)',       expected: tau,     calculated: measuredLag },
+    { label: 'Steady-state error', expected: K * tau, calculated: finalErr }
+  ].map(r => {
+    const passed = Math.abs(r.calculated - r.expected) <= 0.01 * Math.abs(r.expected);
+    return `<tr>
+      <th scope="row">${r.label}</th>
+      <td>${r.expected.toFixed(4)}</td>
+      <td>${r.calculated.toFixed(4)}</td>
+      <td><span class="status-pill ${passed ? 'pass' : 'fail'}">${passed ? 'PASS' : 'FAIL'}</span></td>
+    </tr>`;
+  }).join('');
+
   info.innerHTML = `
-    <p><b>Error definition:</b> e(t) = Kx(t) − y(t) (reference minus output, not x(t) − y(t)).</p>
-    <p><b>Time lag:</b> after the transient (t ≳ 3τ), y(t) ≈ K(t − τ), so the output is
-       delayed by <b>τ = ${tau.toFixed(2)} s</b>.</p>
-    <p><b>Steady-state error:</b> Kτ = <b>${(K * tau).toFixed(3)}</b>
-       (error at t = ${times[times.length - 1].toFixed(1)} s: ${finalErr.toFixed(3)}).</p>
-    <p><i>Note:</i> if K ≠ 1, the difference between x(t) and y(t) is not the error;
-       the error is measured against Kx(t).</p>`;
+    <h3>Ramp results</h3>
+    <div class="results">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Quantity</th>
+            <th scope="col">Expected (theory)</th>
+            <th scope="col">Calculated from curve (t = ${tEnd.toFixed(1)} s)</th>
+            <th scope="col">Result</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p><b>How to read the plot:</b> the output y(t) starts slowly, then after about 5τ it settles onto the dashed line K(t − τ).</p>
+    <p><b>Time lag:</b> on that dashed line the output equals K·t, but τ = ${tau.toFixed(2)} s later, so the sensor always shows the input as it was τ seconds ago.</p>
+    <p><b>Steady-state error:</b> the output stays below K·x(t) by a constant
+       Kτ = ${(K * tau).toFixed(3)}, where e(t) = K·x(t) − y(t). If K ≠ 1, measure the error against K·x(t), not x(t).</p>`;
 }
