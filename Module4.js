@@ -152,5 +152,5 @@
     });
 
     newSensor();
-})();
+})();cd C:\Users\hp\encs4380-dynamics-T23
 
