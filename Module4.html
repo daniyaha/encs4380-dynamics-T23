@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Module 4: Guess the Sensor</title>
+  <link rel="stylesheet" href="style1.css">
+  <style>
+    /* Module 4 only */
+    .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 12px; }
+    .row label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
+    .row input[type="number"], .row select { padding: 6px 8px; width: 140px; font: inherit; }
+    button { padding: 8px 14px; font: inherit; cursor: pointer; }
+    #scoreBar { font-weight: 600; margin: 0 0 10px; }
+    #msg, #hintText, #predictionFeedback { margin: 8px 0 0; }
+  </style>
+</head>
+<body>
+
+<header class="page-head">
+  <a href="index.html">&larr; Toolkit home</a>
+  <h1>Module 4: Guess the Sensor</h1>
+  <p>
+    A hidden sensor is excited with a unit-style step and the noisy response is plotted.
+    Read the curve like an engineer and estimate its parameters.
+    Within 10% of the true value earns full marks.
+  </p>
+</header>
+
+<main>
+
+  <section class="panel" aria-labelledby="predictTitle">
+    <h2 id="predictTitle">Predict, then check</h2>
+    <p>Two second-order sensors have the same &omega;<sub>n</sub>. Sensor A has &zeta; = 0.3, sensor B has &zeta; = 0.7. Which overshoots more?</p>
+    <div class="row">
+      <label>Your prediction
+        <select id="predAnswer">
+          <option value="">Choose</option>
+          <option value="A">Sensor A</option>
+          <option value="B">Sensor B</option>
+          <option value="same">Same</option>
+        </select>
+      </label>
+      <button type="button" id="predCheck">Check</button>
+    </div>
+    <p id="predictionFeedback" role="status"></p>
+  </section>
+
+  <section class="panel" aria-labelledby="challengeTitle">
+    <h2 id="challengeTitle">Challenge</h2>
+    <p id="scoreBar" role="status">Score: 0 / 0 rounds</p>
+    <p id="sensorInfo"></p>
+    <div id="sensorPlot" class="plot"></div>
+
+    <div class="row">
+      <label id="tauBox">&tau; (s)
+        <input type="number" id="tauGuess" step="any" min="0" placeholder="e.g. 1.5">
+      </label>
+      <label id="zetaBox" hidden>&zeta;
+        <input type="number" id="zetaGuess" step="any" min="0" placeholder="e.g. 0.4">
+      </label>
+      <label id="wnBox" hidden>&omega;<sub>n</sub> (rad/s)
+        <input type="number" id="wnGuess" step="any" min="0" placeholder="e.g. 3">
+      </label>
+      <button type="button" id="submitBtn">Submit guess</button>
+      <button type="button" id="hintBtn">Hint</button>
+      <button type="button" id="newBtn">New sensor</button>
+    </div>
+    <p id="hintText" role="status"></p>
+    <p id="msg" role="status"></p>
+    <div id="resultTable" class="results"></div>
+  </section>
+
+</main>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="second-order.js"></script>
+<script src="module4.js"></script>
+</body>
+</html>
