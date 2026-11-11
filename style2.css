@@ -1,13 +1,13 @@
 :root {
-  --bg: #f5f7fa;
+  --bg: #f7f4fb;
   --panel: #ffffff;
-  --ink: #1b2430;
-  --muted: #5b6776;
-  --line: #d9dfe7;
-  --accent: #1f6fd1;
-  --output: #e8710a;
-  --pass: #1a7f45;
-  --fail: #c62828;
+  --ink: #382c46;
+  --muted: #6d5d7b;
+  --line: #e6ddef;
+  --accent: #765395;
+  --output: #a05d78;
+  --pass: #2e7057;
+  --fail: #a33f50;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
