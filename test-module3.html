@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Module 3 — Second-Order Response</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f3f6fa;
+      color: #182536;
+      font-family: Arial, sans-serif;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    h1 { line-height: 1.3; }
+
+    h2 {
+      margin: 0 0 15px;
+      font-size: 22px;
+    }
+
+    .panel {
+      margin-bottom: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    button, select {
+      max-width: 100%;
+      margin: 5px 6px 5px 0;
+      padding: 10px 12px;
+      border: 1px solid #b8c8d8;
+      border-radius: 6px;
+      font: inherit;
+    }
+
+    select {
+      background: white;
+      color: #182536;
+    }
+
+    button {
+      background: #166baa;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    button:focus-visible,
+    select:focus-visible,
+    input:focus-visible {
+      outline: 3px solid #e88a16;
+      outline-offset: 3px;
+    }
+
+    #predictionResult {
+      line-height: 1.7;
+    }
+
+    .plot {
+      width: 100%;
+      height: 500px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin: 10px 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .symbol {
+      display: inline-block;
+      width: 18px;
+      height: 4px;
+      background: var(--color);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .result {
+      margin: 0;
+      padding: 15px;
+      background: #eaf3fc;
+      border-radius: 8px;
+      line-height: 1.7;
+    }
+
+    .note {
+      color: #526173;
+      line-height: 1.6;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #dce4ed;
+    }
+
+    th { background: #eaf3fc; }
+
+    .pass {
+      color: #146c43;
+      font-weight: bold;
+    }
+
+    .fail {
+      color: #b42318;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .panel { padding: 12px; }
+      h1 { font-size: 26px; }
+      h2 { font-size: 20px; }
+      .results { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+<main>
+  <h1>Module 3: Second-Order Response</h1>
+
+  <p class="note">
+    Change the damping ratio and natural frequency
+    to explore the response.
+  </p>
+
+  <section class="panel">
+    <h2>Predict, then check</h2>
+
+    <p class="note">
+      Start with ζ = 0.50. Choose and save your prediction
+      before changing the slider.
+    </p>
+
+    <div id="predictionBox"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Controls</h2>
+
+    <label for="zetaSlider">
+      Damping ratio ζ:
+      <output id="zetaValue" for="zetaSlider">0.50</output>
+    </label>
+
+    <input id="zetaSlider" type="range"
+           min="0.1" max="2" step="0.05" value="0.5">
+
+    <label for="wnSlider">
+      Natural frequency ωₙ:
+      <output id="wnValue" for="wnSlider">2.00</output>
+      rad/s
+    </label>
+
+    <input id="wnSlider" type="range"
+           min="0.5" max="10" step="0.1" value="2">
+
+    <label for="timeMode">Time axis:</label>
+
+    <select id="timeMode" aria-describedby="timeModeHelp">
+      <option value="fixed">Fixed — 20 seconds</option>
+      <option value="auto">Auto — show the full response</option>
+    </select>
+
+    <p id="timeModeHelp" class="note">
+      Fixed keeps the same time scale for comparing speeds.
+      Auto adjusts the time scale to include settling
+      and the first peak.
+    </p>
+
+    <p id="dampingType"></p>
+
+    <p class="note">
+      Unit step: A = 1, gain K = 1,
+      zero initial conditions.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>Second-Order Step Response</h2>
+
+    <div class="legend">
+      <span>
+        <i class="symbol" style="--color:#1674b8"></i>
+        Output
+      </span>
+
+      <span>
+        <i class="symbol" style="--color:#777"></i>
+        Final value
+      </span>
+
+      <span>
+        <i class="symbol dot" style="--color:#e88a16"></i>
+        10% crossing
+      </span>
+
+      <span>
+        <i class="symbol dot" style="--color:#198754"></i>
+        90% crossing
+      </span>
+
+      <span>
+        <i class="symbol dot" style="--color:#b02a69"></i>
+        First peak / overshoot
+      </span>
+
+      <span>
+        <i class="symbol" style="--color:#7c5cc4"></i>
+        Settling time
+      </span>
+
+      <span>
+        <i class="symbol" style="--color:#69a98a"></i>
+        ±2% band
+      </span>
+    </div>
+
+    <div id="secondOrderPlot" class="plot"></div>
+
+    <div class="results" aria-live="polite">
+      <p id="riseTimeResult" class="result"></p>
+      <p id="peakTimeResult" class="result"></p>
+      <p id="overshootResult" class="result"></p>
+      <p id="settlingTimeResult" class="result"></p>
+    </div>
+
+    <p class="note">
+      Rise time: time between the first 10% and 90% crossings.
+      Peak time: time from the start to the first peak.
+      Overshoot: the percentage above the final value.
+      Settling time: the time after which the output stays
+      between 0.98 and 1.02.
+    </p>
+
+    <p id="timeWindowNote" class="note"></p>
+  </section>
+
+  <section class="panel">
+    <h2>Poles in the s-plane</h2>
+
+    <div id="polesPlot" class="plot"></div>
+
+    <p id="poleValues" class="result"></p>
+  </section>
+
+  <section class="panel">
+    <h2>Validation checks</h2>
+
+    <p class="note">
+      These checks use fixed test parameters:
+      K = 1, A = 1 and ωₙ = 2 rad/s.
+      They are independent of the sliders.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Test</th>
+            <th scope="col">ζ</th>
+            <th scope="col">Expected overshoot</th>
+            <th scope="col">Calculated overshoot</th>
+            <th scope="col">Result</th>
+          </tr>
+        </thead>
+
+        <tbody id="validationRows"></tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      Validation 4 allows a difference of 0.1 percentage points
+      from the rounded expected value.
+      Validation 5 checks that overshoot is effectively zero.
+    </p>
+  </section>
+</main>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="second-order.js"></script>
+
+<script>
+  const zetaSlider = document.getElementById("zetaSlider");
+  const wnSlider = document.getElementById("wnSlider");
+  const timeMode = document.getElementById("timeMode");
+
+  const plotConfig = {
+    responsive: true,
+    displayModeBar: false
+  };
+
+  function drawModule3() {
+    const zeta = Number(zetaSlider.value);
+    const wn = Number(wnSlider.value);
+
+    const poles = secondOrderPoles(zeta, wn);
+    const rise = secondOrderRiseTime(zeta, wn);
+    const peak = secondOrderPeak(zeta, wn);
+    const overshoot = secondOrderOvershoot(zeta, wn);
+    const settling = secondOrderSettlingTime(zeta, wn);
+
+    document.getElementById("zetaValue").textContent =
+      zeta.toFixed(2);
+
+    document.getElementById("wnValue").textContent =
+      wn.toFixed(2);
+
+    const type = zeta < 1
+      ? "Underdamped"
+      : zeta === 1
+        ? "Critically damped"
+        : "Overdamped";
+
+    document.getElementById("dampingType").textContent =
+      "Response type: " + type;
+
+    document.getElementById("riseTimeResult").textContent =
+      rise.riseTime === null
+        ? "Rise time: not found."
+        : "Rise time (10–90%): " +
+          rise.riseTime.toFixed(3) + " s";
+
+    document.getElementById("peakTimeResult").textContent =
+      peak === null
+        ? "Peak time: No peak."
+        : "Peak time: " + peak.peakTime.toFixed(3) + " s";
+
+    document.getElementById("overshootResult").textContent =
+      "Overshoot: " + overshoot.toFixed(2) + "%";
+
+    document.getElementById("settlingTimeResult").textContent =
+      settling === null
+        ? "Settling time: not found."
+        : "Settling time (±2%): " +
+          settling.toFixed(3) + " s";
+
+    // Choose a fixed or automatic time window.
+    const autoTime = timeMode.value === "auto";
+
+    const decayRate = zeta <= 1
+      ? zeta * wn
+      : -poles[0].real;
+
+    const endTime = autoTime
+      ? Math.max(
+          10 / decayRate,
+          settling !== null ? settling * 1.3 : 0,
+          rise.t90 !== null ? rise.t90 * 1.3 : 0,
+          peak !== null ? peak.peakTime * 1.3 : 0
+        )
+      : 20;
+
+    const samples = 4000;
+
+    const t = Array.from(
+      { length: samples + 1 },
+      (_, i) => i * endTime / samples
+    );
+
+    const y = t.map(time =>
+      secondOrderStep(time, zeta, wn)
+    );
+
+    const traces = [
+      {
+        x: t,
+        y: y,
+        mode: "lines",
+        line: {
+          color: "#1674b8",
+          width: 3
+        },
+        hovertemplate:
+          "Time: %{x:.3f} s<br>" +
+          "Output: %{y:.3f}<extra></extra>"
+      },
+      {
+        x: [0, endTime],
+        y: [1, 1],
+        mode: "lines",
+        line: {
+          color: "#777777",
+          dash: "dash"
+        },
+        hoverinfo: "skip"
+      }
+    ];
+
+    if (rise.t10 !== null && rise.t10 <= endTime) {
+      traces.push({
+        x: [rise.t10],
+        y: [0.1],
+        mode: "markers",
+        marker: {
+          color: "#e88a16",
+          size: 10
+        },
+        hovertemplate:
+          "10% crossing<br>" +
+          "Time: %{x:.3f} s<extra></extra>"
+      });
+    }
+
+    if (rise.t90 !== null && rise.t90 <= endTime) {
+      traces.push({
+        x: [rise.t90],
+        y: [0.9],
+        mode: "markers",
+        marker: {
+          color: "#198754",
+          size: 10
+        },
+        hovertemplate:
+          "90% crossing<br>" +
+          "Time: %{x:.3f} s<extra></extra>"
+      });
+    }
+
+    if (peak !== null && peak.peakTime <= endTime) {
+      traces.push({
+        x: [peak.peakTime],
+        y: [peak.peakValue],
+        mode: "markers",
+        marker: {
+          color: "#b02a69",
+          size: 11
+        },
+        hovertemplate:
+          "First peak<br>Time: %{x:.3f} s<br>" +
+          "Output: %{y:.3f}<extra></extra>"
+      });
+
+      traces.push({
+        x: [peak.peakTime, peak.peakTime],
+        y: [1, peak.peakValue],
+        mode: "lines",
+        line: {
+          color: "#b02a69",
+          width: 2,
+          dash: "dot"
+        },
+        hovertemplate:
+          "Overshoot: " + overshoot.toFixed(2) +
+          "%<extra></extra>"
+      });
+    }
+
+    if (settling !== null && settling <= endTime) {
+      traces.push({
+        x: [settling],
+        y: [secondOrderStep(settling, zeta, wn)],
+        mode: "markers",
+        marker: {
+          color: "#7c5cc4",
+          size: 11,
+          symbol: "diamond"
+        },
+        hovertemplate:
+          "Settling time (±2%)<br>" +
+          "Time: %{x:.3f} s<extra></extra>"
+      });
+    }
+
+    const shapes = [
+      {
+        type: "rect",
+        xref: "x",
+        yref: "y",
+        x0: 0,
+        x1: endTime,
+        y0: 0.98,
+        y1: 1.02,
+        fillcolor: "rgba(105,169,138,0.20)",
+        line: { width: 0 },
+        layer: "below"
+      },
+      {
+        type: "line",
+        x0: 0,
+        x1: endTime,
+        y0: 0.98,
+        y1: 0.98,
+        line: {
+          color: "#69a98a",
+          width: 1,
+          dash: "dot"
+        },
+        layer: "below"
+      },
+      {
+        type: "line",
+        x0: 0,
+        x1: endTime,
+        y0: 1.02,
+        y1: 1.02,
+        line: {
+          color: "#69a98a",
+          width: 1,
+          dash: "dot"
+        },
+        layer: "below"
+      }
+    ];
+
+    if (settling !== null && settling <= endTime) {
+      shapes.push({
+        type: "line",
+        x0: settling,
+        x1: settling,
+        y0: 0,
+        y1: 1.1,
+        line: {
+          color: "#7c5cc4",
+          width: 2,
+          dash: "dash"
+        },
+        layer: "below"
+      });
+    }
+
+    const outsideWindow = [];
+
+    if (rise.t90 !== null && rise.t90 > endTime) {
+      outsideWindow.push("the 90% crossing");
+    }
+
+    if (peak !== null && peak.peakTime > endTime) {
+      outsideWindow.push("the first peak");
+    }
+
+    if (settling !== null && settling > endTime) {
+      outsideWindow.push("the settling time");
+    }
+
+    document.getElementById("timeWindowNote").textContent =
+      (autoTime
+        ? "Automatic time axis: 0–" + endTime.toFixed(2) +
+          " s. Check the time labels when comparing speeds."
+        : "Fixed time axis: 0–20 s for comparing response speeds.") +
+      (outsideWindow.length
+        ? " Outside this window: " +
+          outsideWindow.join(", ") + "."
+        : "");
+
+    Plotly.react("secondOrderPlot", traces, {
+      showlegend: false,
+      shapes: shapes,
+
+      xaxis: {
+        title: {
+          text: "Time (s)",
+          standoff: 18
+        },
+        range: [0, endTime],
+        autorange: false,
+        automargin: true
+      },
+
+      yaxis: {
+        title: {
+          text: "Output y(t)",
+          standoff: 12
+        },
+        range: [0, 2],
+        autorange: false,
+        automargin: true
+      },
+
+      margin: {
+        t: 20,
+        b: 75,
+        l: 65,
+        r: 20
+      },
+
+      paper_bgcolor: "white",
+      plot_bgcolor: "white"
+    }, plotConfig);
+
+    const repeated = zeta === 1;
+
+    Plotly.react("polesPlot", [{
+      x: repeated
+        ? [poles[0].real]
+        : poles.map(p => p.real),
+
+      y: repeated
+        ? [0]
+        : poles.map(p => p.imag),
+
+      mode: repeated ? "markers+text" : "markers",
+      text: repeated ? ["Repeated pole ×2"] : [],
+      textposition: "top center",
+
+      marker: {
+        symbol: "x",
+        size: 14,
+        color: "#b02a69"
+      },
+
+      hovertemplate:
+        "Real: %{x:.3f}<br>" +
+        "Imaginary: %{y:.3f}<extra></extra>"
+    }], {
+      showlegend: false,
+
+      xaxis: {
+        title: {
+          text: "Real part (s⁻¹)",
+          standoff: 18
+        },
+        range: [
+          Math.min(...poles.map(p => p.real)) - wn,
+          wn * 0.5
+        ],
+        zeroline: true,
+        zerolinecolor: "#555555",
+        automargin: true
+      },
+
+      yaxis: {
+        title: {
+          text: "Imaginary part (s⁻¹)",
+          standoff: 12
+        },
+        range: [-wn * 1.2, wn * 1.2],
+        scaleanchor: "x",
+        scaleratio: 1,
+        zeroline: true,
+        zerolinecolor: "#555555",
+        automargin: true
+      },
+
+      margin: {
+        t: 30,
+        b: 75,
+        l: 75,
+        r: 20
+      },
+
+      paper_bgcolor: "white",
+      plot_bgcolor: "white"
+    }, plotConfig);
+
+    document.getElementById("poleValues").textContent =
+      poles.map((p, i) => {
+        const imaginaryPart = p.imag === 0
+          ? ""
+          : (p.imag > 0 ? " + j" : " - j") +
+            Math.abs(p.imag).toFixed(3);
+
+        return "p" + (i + 1) + " = " +
+          p.real.toFixed(3) + imaginaryPart;
+      }).join("   |   ");
+  }
+
+  function showValidation() {
+    const results = secondOrderValidation();
+    const tbody = document.getElementById("validationRows");
+
+    tbody.replaceChildren();
+
+    results.forEach(test => {
+      const row = document.createElement("tr");
+
+      const values = [
+        test.name,
+        test.zeta.toFixed(2),
+        test.expected.toFixed(2) + "%",
+        test.actual.toFixed(2) + "%",
+        test.passed ? "PASS" : "FAIL"
+      ];
+
+      values.forEach((value, index) => {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+
+        if (index === 4) {
+          cell.className = test.passed ? "pass" : "fail";
+        }
+
+        row.appendChild(cell);
+      });
+
+      tbody.appendChild(row);
+    });
+  }
+
+  zetaSlider.addEventListener("input", drawModule3);
+  wnSlider.addEventListener("input", drawModule3);
+  timeMode.addEventListener("change", drawModule3);
+
+  drawModule3();
+  showValidation();
+  initSecondOrderPrediction();
+</script>
+</body>
+</html>

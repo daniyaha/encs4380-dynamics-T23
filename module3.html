@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ENCS4380 second-order systems: step response, poles, state-space, phase plane, prediction, and validation.">
+  <title>Module 3 | Second-Order Systems — Dynamic Characteristics Toolkit</title>
+  <link rel="stylesheet" href="module3.css">
+  <!-- Keep these files together. Partner 2, then Partner 3, then the page integration. -->
+  <script defer src="second-order.js"></script>
+  <script defer src="state-space.js"></script>
+  <script defer src="module3.js"></script>
+</head>
+<body>
+  <div class="site-shell">
+    <header class="hero">
+      <div class="hero-top">
+        <a class="back-link" href="index.html" aria-label="Back to toolkit home">← Toolkit home</a>
+       
+      </div>
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> DYNAMIC CHARACTERISTICS TOOLKIT </div>
+        <h1>Second-Order <span>Systems</span></h1>
+        <p>Explore how mass, damping, and spring stiffness shape a system's response. The step response, s-plane, and state-space panel all describe the same physical model.</p>
+        <div class="hero-tags"><span>Unit step force F(t) = 1 N</span><span>Initially at rest</span><span>Live system model</span></div>
+      </div>
+      <div class="hero-equation" aria-label="Mass spring damper equation">m ẍ + b ẋ + k x = F(t)</div>
+    </header>
+
+    <main>
+      <!-- 01: Shared controls; IDs are required by the existing Partner 3 code. -->
+      <section class="panel" id="controls" aria-labelledby="controlsTitle">
+        <div class="section-head"><span class="step-no">01</span><div class="section-title"><h2 id="controlsTitle">System Parameters</h2><p>Move the sliders or choose a damping case. Both partners' graphs update together.</p></div></div>
+        <div class="controls-layout">
+          <div class="sliders-grid">
+            <div class="control">
+              <div class="control-top"><label for="massSlider">Mass <b>m</b></label><output id="massValue" for="massSlider">1.00 kg</output></div>
+              <input type="range" id="massSlider" min="0.5" max="5" step="0.05" value="1">
+              <small>Inertia of the moving body</small>
+            </div>
+            <div class="control">
+              <div class="control-top"><label for="dampingSlider">Damping <b>b</b></label><output id="dampingValue" for="dampingSlider">2.00 N·s/m</output></div>
+              <input type="range" id="dampingSlider" min="0" max="30" step="any" value="2">
+              <small>How quickly oscillations decay</small>
+            </div>
+            <div class="control">
+              <div class="control-top"><label for="springSlider">Spring stiffness <b>k</b></label><output id="springValue" for="springSlider">4.00 N/m</output></div>
+              <input type="range" id="springSlider" min="0.5" max="12" step="0.05" value="4">
+              <small>Restoring force per displacement</small>
+            </div>
+          </div>
+          <div class="quick-controls">
+            <p class="small-heading">QUICK DAMPING CASES</p>
+            <div class="preset-grid">
+              <button type="button" data-preset="none">No damping</button>
+              <button type="button" data-preset="under">Underdamped</button>
+              <button type="button" data-preset="critical">Critical</button>
+              <button type="button" data-preset="over">Overdamped</button>
+            </div>
+            <button type="button" class="reset-button" id="resetButton">↺ Reset to reference</button>
+          </div>
+        </div>
+        <div class="summary-strip">
+          <div class="summary-metric"><span>Damping ratio <b>ζ</b></span><strong id="zetaValue">0.500</strong></div>
+          <div class="summary-metric"><span>Natural frequency <b>ωₙ</b></span><strong id="omegaValue">2.000 rad/s</strong></div>
+          <div class="summary-metric"><span>Response type</span><strong id="responseType">Underdamped</strong></div>
+          <div class="summary-metric"><span>Final displacement</span><strong id="equilibriumValue">0.250 m</strong></div>
+        </div>
+        <div class="model-footer"><span id="responseDescription">The oscillation gradually decreases.</span><span class="formula-hint">ωₙ = √(k/m) &nbsp; · &nbsp; ζ = b/(2√(mk))</span><span id="dampingGuide">0 &lt; ζ &lt; 1 → Underdamped</span></div>
+      </section>
+
+      <!-- 02: Partner 2 step plot and metrics. -->
+      <section class="panel" id="step-response" aria-labelledby="stepTitle">
+        <div class="section-head"><span class="step-no">02</span><div class="section-title"><h2 id="stepTitle">Step Response</h2><p>Watch the displacement x(t) after a 1 N force is applied at t = 0.</p></div></div>
+        <div class="chart-frame">
+          <div class="chart-top"><strong>Displacement x(t) vs. Time</strong><span class="graph-label">Reference line = final displacement</span></div>
+          <svg id="stepResponsePlot" viewBox="0 0 880 320" role="img" aria-label="Step response with rise and settling indicators"></svg>
+          <div class="legend"><span><i class="legend-line purple"></i>Response x(t)</span><span><i class="legend-line orange dashed"></i>Final value</span><span><i class="legend-dot green"></i>Current time</span><span><i class="legend-line sage dashed"></i>2% settling band</span></div>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-card"><small>Rise time · 10–90%</small><strong id="riseTimeValue">—</strong><span>Time between the first 10% and 90% crossings</span></div>
+          <div class="metric-card"><small>Peak time</small><strong id="peakTimeValue">—</strong><span>First peak, if one exists</span></div>
+          <div class="metric-card"><small>Overshoot</small><strong id="overshootValue">—</strong><span>Maximum above the final value</span></div>
+          <div class="metric-card"><small>Settling time · ±2%</small><strong id="settlingTimeValue">—</strong><span>Time after which the response stays within ±2%</span></div>
+        </div>
+        <p class="explain-note" id="stepExplanation">Underdamped systems oscillate around equilibrium with decreasing amplitude.</p>
+      </section>
+
+      <!-- 03: Partner 2 s-plane, with Partner 3 eigenvalue overlays. -->
+      <section class="panel" id="s-plane" aria-labelledby="polesTitle">
+        <div class="section-head"><span class="step-no">03</span><div class="section-title"><h2 id="polesTitle">Poles in the s-plane</h2><p>Compare the poles of the transfer function with the eigenvalues of matrix A.</p></div></div>
+        <div class="plot-and-details">
+          <div class="chart-frame">
+            <div class="chart-top"><strong>s-plane · Real vs. Imaginary</strong><span class="graph-label">× Poles &nbsp; ◯ Eigenvalues</span></div>
+            <svg id="sPlanePlot" viewBox="0 0 700 320" role="img" aria-label="Complex s-plane showing transfer-function poles and matching state-space eigenvalues"></svg>
+            <div class="legend"><span><i class="pole-legend">×</i>Transfer-function poles</span><span><i class="eigen-legend">○</i>State-space eigenvalues</span></div>
+          </div>
+          <div class="details-stack">
+            <div class="info-card"><span class="small-heading">TRANSFER FUNCTION POLES</span><div class="root-line">p₁ = <strong id="poleOne">—</strong></div><div class="root-line">p₂ = <strong id="poleTwo">—</strong></div></div>
+            <div class="info-card"><span class="small-heading">EIGENVALUES OF MATRIX A</span><div class="root-line">λ₁ = <strong id="eigenOne">—</strong></div><div class="root-line">λ₂ = <strong id="eigenTwo">—</strong></div></div>
+            <div class="match-line" id="poleMatchStatus" aria-live="polite">Checking the live comparison…</div>
+            <p class="small-note">For the same m, b, and k, the transfer-function poles and the state-space eigenvalues have the same locations.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04: Original Partner 3 IDs are intentionally retained. -->
+      <section class="panel" id="state-space" aria-labelledby="stateTitle">
+        <div class="section-head"><span class="step-no">04</span><div class="section-title"><h2 id="stateTitle">State-Space Representation</h2><p>The same system expressed as two first-order equations.</p></div></div>
+        <div class="equation-strip"><div><small>Equation of motion</small><strong>m ẍ + b ẋ + kx = F(t)</strong></div><div><small>Define the states</small><strong>x₁ = x &nbsp; · &nbsp; x₂ = ẋ</strong></div><div><small>State equations</small><strong>ẋ = Ax + BF(t) &nbsp; · &nbsp; y = Cx</strong></div></div>
+        <div class="matrix-cards">
+          <div class="matrix-card"><div class="matrix-title"><strong>Matrix A</strong><span>System dynamics · 2 × 2</span></div><div id="matrixA" class="matrix two" aria-label="Matrix A" aria-live="polite"><span>0</span><span>1</span><span>−4</span><span>−2</span></div></div>
+          <div class="matrix-card"><div class="matrix-title"><strong>Matrix B</strong><span>Input · 2 × 1</span></div><div id="matrixB" class="matrix one" aria-label="Matrix B" aria-live="polite"><span>0</span><span>1</span></div></div>
+          <div class="matrix-card"><div class="matrix-title"><strong>Matrix C</strong><span>Output · 1 × 2</span></div><div class="matrix two-cols"><span>1</span><span>0</span></div><small class="matrix-caption">y = x₁</small></div>
+        </div>
+        <div class="substitution"><span>With your selected parameters</span><strong id="stateSubstitution">ẋ₂ = −4.000x₁ − 2.000x₂ + 1.000F(t)</strong></div>
+        <div class="eigen-details"><div><small>Characteristic equation</small><strong id="eigenEquation">λ² + 2λ + 4 = 0</strong></div><div><small>Discriminant</small><strong id="discriminantValue">D = −12</strong></div></div>
+      </section>
+
+      <section class="panel" id="phase-plane" aria-labelledby="phaseTitle">
+        <div class="section-head"><span class="step-no">05</span><div class="section-title"><h2 id="phaseTitle">Phase Plane</h2><p>Displacement x₁ on the horizontal axis, velocity x₂ on the vertical axis.</p></div></div>
+        <div class="chart-frame">
+          <div class="chart-top"><strong>Phase plane · Velocity vs. Displacement</strong><span class="graph-label">Follow the green point</span></div>
+          <svg id="phasePlot" viewBox="0 0 860 330" role="img" aria-label="Phase-plane trajectory: displacement versus velocity"></svg>
+          <div class="legend"><span><i class="legend-line purple"></i>State trajectory</span><span><i class="legend-dot green"></i>Current point</span><span><i class="legend-dot orange"></i>Equilibrium</span></div>
+        </div>
+        <div class="time-controls"><button id="playButton" type="button" class="primary-button">▶ Play</button><label for="timeSlider">Explore time</label><input type="range" id="timeSlider" min="0" max="1000" step="1" value="0"><output id="timeValue" for="timeSlider">0.00 s</output></div>
+        <div class="time-readings"><div><small>Displacement x(t)</small><strong id="displacementValue">0.000 m</strong></div><div><small>Velocity v(t)</small><strong id="velocityValue">0.000 m/s</strong></div><div><small>Equilibrium</small><strong id="equilibriumReadout">0.250 m</strong></div></div>
+        <p class="explain-note" id="phaseExplanation">The trajectory spirals inward toward equilibrium.</p>
+      </section>
+
+      <!-- 06: The required predict-then-check interaction. -->
+      <section class="panel" id="prediction" aria-labelledby="predictTitle">
+        <div class="section-head"><span class="step-no">06</span><div class="section-title"><h2 id="predictTitle">Predict, Then Check</h2><p>Make a prediction about overshoot before changing the damping ratio.</p></div></div>
+        <div class="predict-layout">
+          <div class="predict-question"><span class="small-heading">QUESTION</span><p>If the damping ratio increases from <strong>ζ = 0.50</strong> to <strong>ζ = 1.00</strong> while <strong>ωₙ stays fixed</strong>, what happens to overshoot?</p><div class="predict-numbers"><span>At ζ = 0.50: <strong id="predictBefore">—</strong></span><span>At ζ = 1.00: <strong id="predictAfter">Hidden until check</strong></span></div></div>
+          <div class="predict-actions">
+            <label for="predictionAnswer">Your prediction</label>
+            <select id="predictionAnswer"><option value="">Choose an answer</option><option value="increase">It increases</option><option value="zero">It decreases to zero</option><option value="same">It stays the same</option></select>
+            <div class="action-row"><button type="button" class="secondary-button" id="setHalfDamping">Set ζ = 0.50</button><button type="button" class="primary-button" id="savePrediction">Save prediction</button></div>
+            <div class="action-row"><button type="button" class="secondary-button" id="applyCritical" disabled>Apply ζ = 1.00</button><button type="button" class="primary-button" id="checkPrediction" disabled>Check</button><button type="button" class="plain-button" id="resetPrediction">Try again</button></div>
+            <p id="predictionResult" class="prediction-result" aria-live="polite">Set ζ to 0.50, choose an answer, then save your prediction.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07: Required validations, including Partner 3's original detailed table. -->
+      <section class="panel" id="validation" aria-labelledby="validationTitle">
+        <div class="section-head"><span class="step-no">07</span><div class="section-title"><h2 id="validationTitle">Validation 4, 5 &amp; 6</h2><p>Compare expected values to calculated values. These tests use the homework's fixed reference cases, independent of the sliders.</p></div></div>
+        <div class="validation-group"><h3>Second-Order Response </h3><div class="table-scroll"><table><thead><tr><th>Test</th><th>Reference condition</th><th>Expected</th><th>Calculated</th><th>Status</th></tr></thead><tbody>
+          <tr><td><strong>Validation 4</strong></td><td>ζ = 0.50, overshoot</td><td>≈ 16.3%</td><td id="val4Actual">—</td><td><span class="check-status pending" id="val4Status">—</span></td></tr>
+          <tr><td><strong>Validation 5</strong></td><td>ζ = 1.00, overshoot</td><td>0%</td><td id="val5Actual">—</td><td><span class="check-status pending" id="val5Status">—</span></td></tr>
+        </tbody></table></div></div>
+        <div class="validation-group"><h3>State-Space Reference <span> m = 1, b = 2, k = 4</span></h3><div class="table-scroll"><table><thead><tr><th>Test</th><th>Expected</th><th>Calculated</th><th>Status</th></tr></thead><tbody>
+          <tr><td>Damping ratio ζ</td><td>0.500</td><td id="checkZeta">—</td><td><span class="check-status pending" id="statusZeta">—</span></td></tr>
+          <tr><td>Natural frequency ωₙ</td><td>2.000 rad/s</td><td id="checkOmega">—</td><td><span class="check-status pending" id="statusOmega">—</span></td></tr>
+          <tr><td>Eigenvalues of A</td><td>−1 ± j1.732</td><td id="checkEigen">—</td><td><span class="check-status pending" id="statusEigen">—</span></td></tr>
+          <tr><td>Eigenvalues vs. reference poles</td><td>Equal</td><td id="checkPoles">—</td><td><span class="check-status pending" id="statusPoles">—</span></td></tr>
+        </tbody></table></div></div>
+        <p class="small-note">Validation 6's reference comparison and the live eigenvalue-to-pole comparison above are separate checks. All calculations run locally in the browser.</p>
+      </section>
+    </main>
+    <footer class="site-footer"><span>Module 3 · Second-Order Response &amp; State-Space</span></footer>
+  </div>
+</body>
+</html>

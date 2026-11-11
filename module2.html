@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Module 2: First-Order Frequency Response</title>
+    <link rel="stylesheet" href="style2.css">
+    <style>
+        /* Module 2 only. Kept here so style.css (shared) is not edited. */
+        .readouts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .readout {
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
+
+            .readout span {
+                display: block;
+                color: var(--muted);
+                font-size: 0.85rem;
+            }
+
+            .readout strong {
+                font-size: 1.15rem;
+                font-variant-numeric: tabular-nums;
+            }
+
+        .field {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+            margin-bottom: 10px;
+        }
+
+            .field input[type="number"] {
+                width: 110px;
+                padding: 6px 8px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                font: inherit;
+            }
+
+        .note {
+            color: var(--muted);
+            font-size: 0.92rem;
+            margin: 0 0 12px;
+        }
+
+        #predictionBox button, #calcResult {
+            margin-top: 8px;
+        }
+
+        #predictionBox button {
+            padding: 6px 14px;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        #predictionFeedback {
+            margin-top: 10px;
+        }
+
+        .plot.small {
+            min-height: 280px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="page-head">
+        <h1>Module 2: First-Order Frequency Response</h1>
+        <p>
+            Feed a sensor a sine wave and it answers with a sine of the same frequency, but smaller
+            and late. How much smaller and how much later depends on the product of the frequency and &tau;.
+        </p>
+        <p class="model">M = 1 / &radic;(1 + (&omega;&tau;)&sup2;) &nbsp;&nbsp; &phi; = &minus;tan<sup>&minus;1</sup>(&omega;&tau;)</p>
+    </header>
+
+    <main>
+
+        <!-- Controls -->
+        <section class="panel" aria-labelledby="controlsTitle">
+            <h2 id="controlsTitle">Controls</h2>
+
+            <div class="control">
+                <label for="tauSlider">Time constant &tau; (s)</label>
+                <input type="range" id="tauSlider" min="0.05" max="5" step="0.05" value="0.2">
+                <output id="tauValue" for="tauSlider">0.20 s</output>
+            </div>
+
+            <div class="control">
+                <label for="wSlider">Input frequency &omega; (rad/s)</label>
+                <input type="range" id="wSlider" min="-1" max="2" step="0.01" value="0.30103">
+                <output id="wValue" for="wSlider">2.00</output>
+            </div>
+            <p class="note" id="fNote">f = 0.318 Hz. The slider is logarithmic: 0.1 to 100 rad/s.</p>
+        </section>
+
+        <!-- Predict, then check -->
+        <section class="panel" aria-labelledby="predictTitle">
+            <h2 id="predictTitle">Predict, then check</h2>
+            <div id="predictionBox">
+                <p>If the input frequency goes up 10 times (with &tau; unchanged), the output amplitude will:</p>
+                <label class="choice"><input type="radio" name="guess" value="grow"> grow</label>
+                <label class="choice"><input type="radio" name="guess" value="same"> stay the same</label>
+                <label class="choice"><input type="radio" name="guess" value="shrink"> shrink</label>
+                <div><button type="button" id="checkGuess">Check my guess</button></div>
+                <p id="predictionFeedback" role="status"></p>
+            </div>
+        </section>
+
+        <!-- Time response -->
+        <section class="panel" aria-labelledby="timeTitle">
+            <h2 id="timeTitle">Input and output (steady state)</h2>
+            <div class="readouts">
+                <div class="readout"><span>Amplitude ratio M</span><strong id="mValue">-</strong></div>
+                <div class="readout"><span>Gain (dB)</span><strong id="dbValue">-</strong></div>
+                <div class="readout"><span>Phase &phi; (degrees)</span><strong id="phiValue">-</strong></div>
+                <div class="readout"><span>Time delay (s)</span><strong id="delayValue">-</strong></div>
+                <div class="readout"><span>Dynamic error &delta; = M &minus; 1</span><strong id="deltaValue">-</strong></div>
+            </div>
+            <div id="timePlot" class="plot"></div>
+        </section>
+
+        <!-- Bode -->
+        <section class="panel" aria-labelledby="bodeTitle">
+            <h2 id="bodeTitle">Bode plot</h2>
+            <p class="note">The dashed line marks the cutoff &omega; = 1/&tau;, where M = 0.707 (&minus;3 dB) and the phase is &minus;45&deg;. The red dot is your current frequency.</p>
+            <div id="bodeMag" class="plot small"></div>
+            <div id="bodePhase" class="plot small"></div>
+        </section>
+
+        <!-- Dynamic error calculator -->
+        <section class="panel" aria-labelledby="calcTitle">
+            <h2 id="calcTitle">Dynamic-error calculator</h2>
+            <p class="note">How slow can a sensor be and still measure a signal up to a given frequency within a given error?</p>
+            <div class="field">
+                <label for="errInput">Maximum allowed error (%)</label>
+                <input type="number" id="errInput" value="5" min="0.01" max="99" step="any">
+            </div>
+            <div class="field">
+                <label for="fInput">Highest signal frequency (Hz)</label>
+                <input type="number" id="fInput" value="100" min="0.001" step="any">
+            </div>
+            <div id="calcResult" role="status"></div>
+        </section>
+
+        <!-- Validation -->
+        <section class="panel" aria-labelledby="validTitle">
+            <h2 id="validTitle">Validation checks</h2>
+            <p class="note">Fixed inputs from the lecture slides. They do not depend on the sliders.</p>
+            <div id="validationResults" class="results"></div>
+        </section>
+
+    </main>
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="module2.js"></script>
+</body>
+</html>

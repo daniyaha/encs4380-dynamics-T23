@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Module 1: First-Order Time Response</title>
+  <link rel="stylesheet" href="style1.css">
+</head>
+<body>
+
+<header class="page-head">
+  <h1>Module 1: First-Order Time Response</h1>
+  <p>
+    A thermometer never shows the present temperature, it shows the past, smoothed.
+    The time constant <strong>&tau;</strong> tells you how far behind it is.
+    Change K and &tau;, switch between a step and a ramp, and watch how the output follows the input.
+  </p>
+  <p class="model">&tau;&middot;dy/dt + y = K&middot;x(t) &nbsp;&nbsp; G(s) = K / (&tau;s + 1)</p>
+</header>
+
+<main>
+
+  <!-- Controls -->
+  <section class="panel" aria-labelledby="controlsTitle">
+    <h2 id="controlsTitle">Controls</h2>
+
+    <div class="control">
+      <label for="kSlider">Gain K</label>
+      <input type="range" id="kSlider" min="0.5" max="5" step="0.5" value="1">
+      <output id="kValue" for="kSlider">1.0</output>
+    </div>
+
+    <div class="control">
+      <label for="tauSlider">Time constant &tau; (s)</label>
+      <input type="range" id="tauSlider" min="0.1" max="10" step="0.1" value="1">
+      <output id="tauValue" for="tauSlider">1.0 s</output>
+    </div>
+
+    <fieldset class="control input-type">
+      <legend>Input type</legend>
+      <label class="choice"><input type="radio" name="inputType" value="step" checked> Step (A = 1)</label>
+      <label class="choice"><input type="radio" name="inputType" value="ramp"> Ramp (slope = 1 unit/s)</label>
+    </fieldset>
+  </section>
+
+  <!-- Predict, then check (filled by prediction.js) -->
+  <section class="panel" aria-labelledby="predictTitle">
+    <h2 id="predictTitle">Predict, then check</h2>
+    <div id="predictionBox">
+      <p class="placeholder">The prediction question loads here.</p>
+    </div>
+  </section>
+
+  <!-- Step response: stepPlot, validationResults, errorPlot, logErrorPlot -->
+  <section id="stepSection" class="panel" aria-labelledby="stepTitle">
+    <h2 id="stepTitle">Step response</h2>
+    <div id="stepPlot" class="plot"></div>
+    <div id="validationResults" class="results"></div>
+    <div id="errorPlot" class="plot"></div>
+    <div id="logErrorPlot" class="plot"></div>
+  </section>
+
+  <!-- Ramp response: rampPlot -->
+  <section id="rampSection" class="panel" aria-labelledby="rampTitle" hidden>
+    <h2 id="rampTitle">Ramp response</h2>
+    <div id="rampPlot" class="plot"></div>
+  </section>
+
+</main>
+
+<!-- Plotly first, then the team's files, main.js last -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="step.js"></script>
+<script src="ramp.js"></script>
+<script src="error.js"></script>
+<script src="prediction.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
