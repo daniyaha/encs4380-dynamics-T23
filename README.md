@@ -1,6 +1,6 @@
-# Dynamic Characteristics Toolkit
+# Dynamic Characteristics Interactive Toolki
 
-**ENCS4380 · Interfacing Techniques · Birzeit University · Team 23**
+**ENCS4380 · Interfacing Techniques ·  Team 23**
 
 An interactive toolkit for exploring how sensors respond to changing inputs. Users can adjust system parameters, observe how the response changes, and test their understanding by estimating sensor parameters from a plot.
 
