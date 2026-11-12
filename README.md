@@ -10,7 +10,7 @@ An interactive toolkit for exploring how sensors respond to changing inputs. Use
 
 | Module | What it covers | Contributors |
 |---|---|---|
-| [01 · First-Order Time Response](module1.html) | Step and ramp responses, time constant, and error fraction. | All team members: Shatha, Dina, Dania, Israa and Shatha |
+| [01 · First-Order Time Response](module1.html) | Step and ramp responses, time constant, and error fraction. | All team members:  Dina, Dania, Israa and Shatha |
 | [02 · First-Order Frequency Response](module2.html) | How input frequency affects amplitude and phase, including the cutoff frequency. | Dania |
 | [03 · Second-Order Response](module3.html) | Step responses for different damping cases, response metrics, poles, and a state-space model. | Dina and Israa |
 | [04 · Guess the Sensor](module4.html) | An interactive challenge where users estimate sensor parameters from a response plot and check their guesses. | Shatha |
