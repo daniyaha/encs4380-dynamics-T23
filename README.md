@@ -27,6 +27,11 @@ An interactive toolkit for exploring how sensors respond to changing inputs. Use
 
 ![Module 3 controls and response plots]
 <img width="1920" height="1020" alt="Screenshot 2026-11-12 104726" src="https://github.com/user-attachments/assets/7e47a46d-a0dc-4bcc-ba78-65da31dabe49" />
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/c9f8d31d-5931-415a-bd94-148136ba0f1c" />
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/5b4bf37a-18fe-4572-9c36-fd3b79abb089" />
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/a75ad735-e266-4985-9ede-94ba7f81f192" />
+
+
 
 
 ## AI Assistance
