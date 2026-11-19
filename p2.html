@@ -1,0 +1,81 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P2 | Slow Sensor in the Loop</title>
+<style>
+:root{font:15px/1.55 Inter,ui-sans-serif,system-ui;color:#28223b;background:#f7f5fb}
+body{margin:0} main{max-width:1100px;margin:auto;padding:1.5rem}
+header{padding:1.5rem;background:linear-gradient(112deg,#312445 4%,#59406f 52%,#7a5a9f);color:white;border-radius:20px;margin-bottom:1rem;box-shadow:0 16px 42px #3d285f1c}
+h1,h2,p{margin:0 0 .75rem} h1{font-size:clamp(1.6rem,5vw,2.5rem)}
+.layout{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,2.4fr);gap:1rem}
+section,aside{background:white;border:1px solid #e9e3f0;border-radius:15px;padding:1rem;box-shadow:0 7px 26px #38274d0b}
+label{display:block;margin-top:.6rem} output{float:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:#7552a5} input[type=number]{width:5.5rem;margin-left:.35rem}
+button,select,input[type=number]{font:inherit} button{padding:.32rem .65rem;border:1px solid #7552a5;background:white;color:#5e4d72;border-radius:.35rem;cursor:pointer;margin:.2rem .2rem .2rem 0}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #bb9ce0;outline-offset:2px}
+canvas{display:block;width:100%;height:340px} .legend{display:flex;flex-wrap:wrap;gap:.35rem 1rem;font-size:.9rem}
+.true{color:#7552a5}.sensor{color:#a34e24}.target{color:#665975}.facts{margin-top:.75rem;font-variant-numeric:tabular-nums}
+details{margin-top:1rem} #verdict{margin-top:.5rem} #verdict:empty{display:none} fieldset{margin:.75rem 0 0;border:1px solid #e9e3f0;border-radius:11px;background:#fcfafd;min-width:0} button:hover{background:#f3eef9}
+@media(max-width:680px){main{padding:.75rem}.layout{grid-template-columns:1fr}canvas{height:285px}}
+</style>
+<script defer src="H2_P2.js"></script>
+</head>
+<body>
+<main>
+<header>
+<p>PID Control Toolkit · P2</p>
+<h1>A Slow Sensor in the Loop</h1>
+<p>The PID uses the measured output. Compare it with the true output as the sensor slows down.</p>
+</header>
+<div class="layout">
+<aside aria-label="Simulation controls">
+<h2>Controls</h2>
+<label for="sensorTau">Sensor time constant τ<sub>s</sub> <output id="sensorTauValue" for="sensorTau"></output></label>
+<input id="sensorTau" type="range" min=".05" max="1.5" step=".01" value=".05">
+<label for="kp">Proportional gain K<sub>p</sub> <output id="kpValue" for="kp"></output></label>
+<input id="kp" type="range" min="0" max="12" step=".1" value="3">
+<label for="ki">Integral gain K<sub>i</sub> <output id="kiValue" for="ki"></output></label>
+<input id="ki" type="range" min="0" max="12" step=".1" value="8">
+<label for="kd">Derivative gain K<sub>d</sub> <output id="kdValue" for="kd"></output></label>
+<input id="kd" type="range" min="0" max="3" step=".05" value="0">
+<fieldset>
+<legend>Sensor comparison</legend>
+<button type="button" data-tau=".05">Fast</button>
+<button type="button" data-tau=".45">Slow</button>
+<button type="button" data-tau="1">Oscillation</button>
+<p>Presets set the same PI gains and change τ<sub>s</sub>.</p>
+</fieldset>
+<details>
+<summary>First-order plant settings</summary>
+<label for="gain">Plant gain K <input id="gain" type="number" min=".01" max="100" step="any" value="1" required></label>
+<label for="plantTau">Plant τ (s) <input id="plantTau" type="number" min=".05" max="20" step="any" value="1" required></label>
+<p>Enter the measured motor parameters here once available.</p>
+</details>
+</aside>
+<section aria-labelledby="response">
+<h2 id="response">Step response</h2>
+<div class="legend"><span class="true">━━ True output y</span><span class="sensor">┅┅ Sensor reading yₛ</span><span class="target">···· Setpoint r = 1</span></div>
+<canvas id="plot" role="img" aria-label="Step response comparing true output, sensor reading and setpoint"></canvas>
+<p id="loop-status" class="facts" role="status"></p><p id="stats" class="facts"></p>
+<fieldset>
+<legend>Predict, then check</legend>
+<p>With the same PI gains and reference plant, how will true-output overshoot change when τ<sub>s</sub> increases from 0.05 s to 0.45 s?</p>
+<label for="prediction">Your prediction</label>
+<select id="prediction"><option value="">Select one</option><option value="increase">It increases</option><option value="decrease">It decreases</option><option value="same">It stays about the same</option></select>
+<button id="check" type="button">Check</button>
+<p id="verdict" aria-live="polite"></p>
+</fieldset>
+<details>
+<summary>Simulation equations</summary>
+<p>For the plant, dy/dt = (Ku − y)/τ. For the sensor, dyₛ/dt = (y − yₛ)/τₛ. The PID uses e = r − yₛ, so u = Kₚe + Kᵢ∫e dt − K<sub>d</sub> dyₛ/dt during the constant step. RK4 integrates the plant, sensor and integral states together.</p>
+</details>
+</section>
+</div>
+<section aria-labelledby="validation-title" style="margin-top:1rem"><h2 id="validation-title">Validation</h2><p>P-only unit step: K = 1, plant time constant = 1 s, sensor time constant = 0.05 s, K<sub>p</sub> = 9, K<sub>i</sub> = K<sub>d</sub> = 0. Expected final output = 0.900 and steady-state error = 10.0%.</p><p id="validation-result"></p></section>
+</main>
+</body>
+</html>
+
+
