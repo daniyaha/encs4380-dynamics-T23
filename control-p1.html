@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="P1 PID Playground — ENCS4380 Control Toolkit" />
+  <title>PID Playground | ENCS4380 Control Toolkit</title>
+  <link rel="stylesheet" href="control-p1.css" />
+  <script defer src="control-p1.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="page-shell">
+    <nav class="nav-bar" aria-label="Page navigation">
+      <a class="brand" href="index.html"><span class="brand-mark">✳</span><span>Dynamic <b>Toolkit</b></span></a>
+      <div class="nav-links">
+      <a href="index.html">Home</a>
+      <span class="nav-arrow">/</span>
+      <a href="control.html">Control</a>
+</div>
+      <span class="course-pill"></span>
+    </nav>
+    <header class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> CONTROL TOOLKIT <span class="little-separator">·</span> MODULE 01</div>
+        <h1>PID <span>Playground</span><span class="tiny-spark">✦</span></h1>
+        <p>Explore how proportional, integral, and derivative control change the behavior of a system. Adjust the gains, make a prediction, and watch the response update live.</p>
+        <div class="hero-pills"><span>◉ Live simulation</span><span>⌁ Real-time plots</span><span>✓ Predict, then check</span></div>
+      </div>
+      <div class="hero-illustration" aria-hidden="true">
+        <div class="orbit orbit-large"></div><div class="orbit orbit-small"></div><div class="orb orb-one"></div><div class="orb orb-two"></div>
+        <svg viewBox="0 0 230 130" class="hero-signal"><path d="M8 98 C30 96 33 42 57 42 S83 102 102 80 S124 24 147 39 S170 73 192 51 S210 42 225 38" fill="none" stroke="#7652a5" stroke-width="5" stroke-linecap="round"/><path d="M8 48 H225" fill="none" stroke="#d8bedc" stroke-width="3" stroke-dasharray="6 8"/><circle cx="147" cy="39" r="8" fill="#e6a5a1" stroke="#fff" stroke-width="4"/></svg>
+      </div>
+    </header>
+
+    <main>
+      <section class="main-grid" aria-label="Interactive PID settings and plots">
+        <div class="settings-column">
+          <div class="panel control-panel">
+            <div class="section-heading"><span class="section-num">01</span><div><h2>Choose your plant</h2><p>Start with a first-order or second-order system.</p></div></div>
+            <div class="toggle-tabs" role="group" aria-label="Plant type"><button class="tab active" type="button" data-plant="first">First-order</button><button class="tab" type="button" data-plant="second">Second-order</button></div>
+            <div class="formula-card"><small>PLANT TRANSFER FUNCTION</small><div id="plantFormula" class="math-line">G(s) = K / (τs + 1)</div><p id="plantDescription">A single time constant describes how quickly the output reacts.</p></div>
+            <div id="firstInputs" class="parameter-grid"><label class="range-control"><span>Plant gain (K) <output id="KValue">1.0</output></span><input type="range" id="K" min="0.5" max="2" step="0.1" value="1" /></label><label class="range-control"><span>Time constant (τ) <output id="tauValue">1.0 s</output></span><input type="range" id="tau" min="0.3" max="3" step="0.1" value="1" /></label></div>
+            <div id="secondInputs" class="parameter-grid hidden"><label class="range-control"><span>Mass (m) <output id="mValue">1.0</output></span><input type="range" id="m" min="0.5" max="4" step="0.1" value="1" /></label><label class="range-control"><span>Damping (b) <output id="bValue">2.0</output></span><input type="range" id="b" min="0.2" max="6" step="0.1" value="2" /></label><label class="range-control"><span>Stiffness (k) <output id="kValue">1.0</output></span><input type="range" id="k" min="0.5" max="5" step="0.1" value="1" /></label></div>
+          </div>
+
+          <div class="panel control-panel">
+            <div class="section-heading"><span class="section-num">02</span><div><h2>Tune your controller</h2><p>Each gain changes how the controller responds to error.</p></div></div>
+            <div class="gain-block"><label for="kp"><span class="gain-icon">P</span><span class="gain-label"><b>Proportional · Kp</b><small>Reacts to the current error.</small></span><output id="kpValue" class="gain-value">9.0</output></label><input id="kp" type="range" min="0" max="20" step="0.5" value="9" /></div>
+            <div class="gain-block"><label for="ki"><span class="gain-icon pink">I</span><span class="gain-label"><b>Integral · Ki</b><small>Builds up to remove persistent error.</small></span><output id="kiValue" class="gain-value">0.0</output></label><input id="ki" type="range" min="0" max="8" step="0.5" value="0" /></div>
+            <div class="gain-block"><label for="kd"><span class="gain-icon sage">D</span><span class="gain-label"><b>Derivative · Kd</b><small>Responds to changes and adds damping.</small></span><output id="kdValue" class="gain-value">0.0</output></label><input id="kd" type="range" min="0" max="8" step="0.5" value="0" /></div>
+            <div class="parameter-grid compact"><label class="range-control"><span>Setpoint <output id="spValue">1.0</output></span><input type="range" id="sp" min="0.5" max="2" step="0.1" value="1" /></label><label class="range-control"><span>Control limit (±) <output id="limitValue">10.0</output></span><input type="range" id="limit" min="2" max="20" step="1" value="10" /></label></div>
+            <div class="preset-section"><small>QUICK EXPERIMENTS</small><div class="button-row"><button type="button" class="subtle-btn" data-preset="p">P only</button><button type="button" class="subtle-btn" data-preset="pi">PI control</button><button type="button" class="subtle-btn" data-preset="pid">PID control</button></div></div>
+            <button id="resetButton" type="button" class="reset-button">↺ &nbsp; Reset to default</button>
+          </div>
+        </div>
+
+        <div class="analysis-column">
+          <div class="panel diagram-panel">
+            <div class="topline"><div><h2>Closed-loop control</h2><p>The controller compares the desired value with the measured output.</p></div><span class="info-chip">NEGATIVE FEEDBACK</span></div>
+            <div class="block-diagram-wrap"><svg viewBox="0 0 720 190" role="img" aria-label="Setpoint goes to summing junction; the error goes through PID and the plant; output feeds back negatively to the summing junction."><defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#937aa9"/></marker></defs><g fill="none" stroke="#937aa9" stroke-width="2.5" marker-end="url(#arrow)"><path d="M50 76 H140"/><path d="M186 76 H260"/><path d="M400 76 H460"/><path d="M590 76 H673"/><path d="M640 76 V150 H164 V103"/></g><circle cx="164" cy="76" r="24" fill="#fff" stroke="#b99fcf" stroke-width="3"/><text x="157" y="81" fill="#684d84" font-size="24">+</text><text x="157" y="110" fill="#684d84" font-size="19">−</text><rect x="260" y="42" width="140" height="68" rx="14" fill="#f0e5f7" stroke="#d9c4e9"/><rect x="460" y="42" width="130" height="68" rx="14" fill="#faece8" stroke="#ead1d5"/><g font-family="Segoe UI, Arial" fill="#493553" font-size="20" text-anchor="middle" font-weight="700"><text x="330" y="82">PID</text><text x="525" y="82">Plant</text></g><g fill="#85728d" font-size="17" font-family="Segoe UI, Arial"><text x="12" y="55">r(t)</text><text x="210" y="55">e(t)</text><text x="414" y="55">u(t)</text><text x="657" y="56">y(t)</text><text x="340" y="173">feedback</text></g></svg></div>
+            <div class="equation"><span class="equation-label">PID EQUATION</span><span>u(t) = Kp·e(t) + Ki·∫e(t)dt + Kd·de(t)/dt</span></div>
+          </div>
+
+          <div class="panel plot-panel"><div class="topline"><div><h2>System response</h2><p>Compare the actual output with the target over time.</p></div><span class="live-pill"><span class="pulse"></span> LIVE</span></div><div class="plot-container" id="responsePlot"></div><div class="chart-legend"><span><i class="key purple"></i> Output y(t)</span><span><i class="key pink dashed"></i> Setpoint r(t)</span></div></div>
+          <div class="panel plot-panel"><div class="topline"><div><h2>Control signal</h2><p>See what the controller sends to the plant and when it hits a limit.</p></div><span class="info-chip">SATURATION ±<span id="limitChip">10</span></span></div><div class="plot-container compact-plot" id="controlPlot"></div><div class="chart-legend"><span><i class="key purple"></i> Control u(t)</span><span><i class="key pink dashed"></i> Saturation bounds</span></div></div>
+        </div>
+      </section>
+
+      <section class="panel metrics-panel"><div class="topline"><div><h2><span class="inline-spark">✦</span> Performance snapshot</h2><p>Live measurements extracted from the simulated response.</p></div><span class="info-chip">12 s simulation</span></div><div class="metrics-grid"><div class="metric"><small>RISE TIME</small><strong id="riseMetric">—</strong><span>10% to 90% of target</span></div><div class="metric"><small>OVERSHOOT</small><strong id="overshootMetric">—</strong><span>Above the setpoint</span></div><div class="metric"><small>SETTLING TIME</small><strong id="settlingMetric">—</strong><span>Within ±2% band</span></div><div class="metric"><small>END ERROR</small><strong id="errorMetric">—</strong><span>At 12 s (steady-state estimate)</span></div></div><p class="explain-note">ⓘ The end error is measured at the end of the 12-second simulation; it is not guaranteed to equal the theoretical steady-state error if the system has not settled.</p></section>
+
+      <section class="lower-grid">
+        <div class="panel lesson-panel"><div class="section-heading"><span class="section-num blush">03</span><div><h2>Predict, then check</h2><p>Make a prediction before testing a different gain.</p></div></div><div class="predict-inner"><div><span class="mini-label">YOUR CHALLENGE</span><h3>What happens to the end error if we increase <span>Ki</span> by 0.5?</h3><p>We'll compare your current settings against a second simulation with a slightly higher integral gain.</p></div><div><label class="select-label" for="prediction">MY PREDICTION</label><select id="prediction"><option value="decrease">The error will decrease</option><option value="increase">The error will increase</option><option value="same">It will stay almost the same</option></select><button class="primary-button" id="checkPrediction" type="button">Check my prediction →</button></div></div><div id="predictionResult" class="prediction-result hidden" aria-live="polite"></div></div>
+        <div class="panel validation-panel"><div class="section-heading"><span class="section-num">04</span><div><h2>Validation lab</h2><p>Check the numerical behavior against the homework.</p></div></div><div class="validation-case"><div><b>Check 1 · P-only</b><p>K = 1, τ = 1, Kp = 9 → 10% steady-state error; τcl = 0.1 s</p></div><span>①</span></div><div class="validation-case"><div><b>Check 2 · PI</b><p>Kp = 1, Ki = 1 → critically damped (ζ = 1)</p></div><span>②</span></div><div class="validation-case"><div><b>Check 3 · Step tracking</b><p>A stable PI loop approaches zero steady-state error</p></div><span>③</span></div><button class="outline-button" id="runValidation" type="button">Run validation checks ✓</button><div id="validationResult" class="validation-result hidden" aria-live="polite"></div></div>
+      </section>
+      <p class="page-footnote">ENCS4380 · PID Control Toolkit · Team 23 · P1 Playground · Euler integration (Δt = 0.005 s)</p>
+    </main>
+  </div>
+</body>
+</html>
