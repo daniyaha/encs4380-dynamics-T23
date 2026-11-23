@@ -1,0 +1,43 @@
+## Homework 2 – PID Control Toolkit
+
+This homework extends the Dynamic Characteristics Toolkit by introducing PID control and closed-loop simulation.
+
+### Modules and Contributors
+
+| Module | Description | Contributor |
+|---|---|---|
+| [P1 – PID Playground](control-p1.html) | Explore how Kp, Ki, and Kd affect system response and performance. | Dina |
+| [P2 – Slow Sensor](p2.html) | Investigate how sensor delay affects feedback control, overshoot, and stability. | Israa |
+| [P3 – Digital PID](control-p3.html) | Explore sampling time, anti-windup, and Arduino code generation. | Shatha |
+| [P4 – Tuning Challenge](control-p4.html) | Tune PID gains for a hidden random plant to meet performance specifications. | Dania |
+| [My System – Micromouse](my-system.html) | Simulate PID speed control for the Micromouse DC motor. | Dania – Page; Shatha – Arduino code |
+
+### P4 – Tuning Challenge
+
+The module includes:
+- Randomly generated first-order plants with hidden parameters.
+- Interactive Kp, Ki, and Kd adjustments.
+- Closed-loop simulation using Euler integration.
+- Overshoot, settling time, and steady-state error calculations.
+- Pass/fail checks and a scoring system.
+- Open-loop testing and a Predict, then Check activity.
+
+### My System – Micromouse PID Control
+
+Our Micromouse project uses a GA12-N20 DC gear motor with an encoder, an ESP32 development board, and a DRV8833 motor driver.
+
+The page includes:
+- A first-order motor model.
+- Interactive PID tuning and response simulation.
+- Performance measurements and control signal visualization.
+- ESP32 Arduino code generation.
+
+**Note:** The hardware has not arrived yet. The current simulation uses assumed plant parameters (K = 500 RPM per normalized PWM input and τ = 0.25 s). These are not experimentally measured values. The model and controller will need validation after physical testing.
+
+### AI Assistance
+
+AI tools were used to assist with simulation implementation, code generation, debugging, and GitHub workflow guidance. The generated motor control code has not yet been tested on the physical hardware.
+
+### Live Website
+
+https://daniyaha.github.io/encs4380-dynamics-T23/
