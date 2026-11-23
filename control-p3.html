@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>P3 Digital PID | ENCS4380 Control Toolkit</title>
+  <link rel="stylesheet" href="control-p1.css" />
+  <script defer src="control-p3.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <nav class="nav-bar"><a class="brand" href="index.html"><span class="brand-mark">✳</span><span>Dynamic <b>Toolkit</b></span></a>
+      <div class="nav-links"><a href="index.html">Home</a><span class="nav-arrow">/</span><a href="index.html#control">Control</a></div></nav>
+
+    <header class="hero"><div class="hero-copy">
+      <h1>Digital <span>PID</span></h1>
+      <p>An Arduino reads the sensor, computes u, and holds it until the next sample, once every T<sub>s</sub>:
+        <br><b>u[k] = Kp·e[k] + Ki·Ts·Σe[j] + Kd·(e[k] − e[k−1]) / Ts</b></p>
+    </div></header>
+
+    <main>
+      <section class="main-grid">
+        <div class="panel">
+          <h2>Settings</h2>
+          <label class="range-control"><span>Plant gain K <output id="KOut"></output></span><input type="range" id="K" min="0.2" max="5" step="0.1" value="1" /></label>
+          <label class="range-control"><span>Plant τ (s) <output id="tauOut"></output></span><input type="range" id="tau" min="0.1" max="5" step="0.05" value="1" /></label>
+          <label class="range-control"><span>Kp <output id="kpOut"></output></span><input type="range" id="kp" min="0" max="20" step="0.5" value="8" /></label>
+          <label class="range-control"><span>Ki <output id="kiOut"></output></span><input type="range" id="ki" min="0" max="20" step="0.5" value="10" /></label>
+          <label class="range-control"><span>Kd <output id="kdOut"></output></span><input type="range" id="kd" min="0" max="2" step="0.05" value="0" /></label>
+          <label class="range-control"><span>Sampling time Ts <output id="TsOut"></output></span><input type="range" id="Ts" min="0.005" max="0.5" step="0.005" value="0.05" /></label>
+          <label class="range-control"><span>Actuator limit Umax (Umin = 0) <output id="uMaxOut"></output></span><input type="range" id="uMax" min="0.5" max="20" step="0.5" value="10" /></label>
+          <p>Anti-windup</p>
+          <div class="toggle-tabs"><button class="tab active" type="button" data-aw="on">On</button><button class="tab" type="button" data-aw="off">Off</button></div>
+          <p class="explain-note">Try it: set U<sub>max</sub> = 2, Kp = 4 and Ki = 6, then switch anti-windup off and on.</p>
+        </div>
+
+        <div>
+          <div class="panel plot-panel"><h2>Output y(t) vs setpoint</h2><div class="plot-container" id="yPlot"></div><p id="metrics"></p></div>
+          <div class="panel plot-panel"><h2>Control signal u[k] (stair-step)</h2><div class="plot-container" id="uPlot"></div></div>
+        </div>
+      </section>
+
+      <section class="lower-grid">
+        <div class="panel"><h2>Performance as Ts grows</h2>
+          <p>The same gains, simulated at several sampling times:</p>
+          <table style="width:100%;text-align:left"><thead><tr><th>Ts</th><th>Overshoot</th><th>Settling (±2%)</th></tr></thead><tbody id="sweep"></tbody></table>
+        </div>
+        <div class="panel"><h2>Predict, then check</h2>
+          <p>If we make Ts three times larger, the overshoot will…</p>
+          <select id="prediction"><option value="increase">increase</option><option value="decrease">decrease</option><option value="same">stay about the same</option></select>
+          <button class="primary-button" id="check" type="button">Check</button>
+          <p id="result"></p>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top:18px"><h2>Arduino code for the current gains</h2>
+        <button class="primary-button" id="copy" type="button" style="width:auto">Copy code</button>
+        <pre style="background:#2b2236;color:#f3ecfa;padding:14px;border-radius:12px;overflow:auto"><code id="code"></code></pre>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
