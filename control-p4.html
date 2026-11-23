@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>P4 Tuning Challenge | ENCS4380 Control Toolkit</title>
+  <link rel="stylesheet" href="control-p1.css" />
+  <script defer src="control-p4.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <nav class="nav-bar"><a class="brand" href="index.html"><span class="brand-mark">✳</span><span>Dynamic <b>Toolkit</b></span></a>
+      <div class="nav-links"><a href="index.html">Home</a><span class="nav-arrow">/</span><a href="index.html#control">Control</a></div></nav>
+
+    <header class="hero"><div class="hero-copy">
+      <div class="eyebrow"><span class="eyebrow-dot"></span> CONTROL TOOLKIT <span class="little-separator">·</span> P4</div>
+      <h1>Tuning <span>Challenge</span></h1>
+      <p>A hidden plant G(s) = K / (τs + 1) is waiting for a controller. Tune Kp, Ki and Kd until the closed loop meets the spec. You may test the plant on its own first, but you only see its response, not its numbers.</p>
+    </div></header>
+
+    <main>
+      <section class="main-grid">
+        <div class="settings-column">
+          <div class="panel control-panel">
+            <div class="section-heading"><span class="section-num">01</span><div><h2>The spec</h2><p>The loop must meet all three parts for a unit step (setpoint = 1).</p></div></div>
+            <div class="validation-case"><div><b>Overshoot</b><p id="specOs"></p></div><span id="badgeOs">–</span></div>
+            <div class="validation-case"><div><b>Settling time (±2%)</b><p id="specTs"></p></div><span id="badgeTs">–</span></div>
+            <div class="validation-case"><div><b>Steady-state error</b><p id="specErr"></p></div><span id="badgeErr">–</span></div>
+          </div>
+
+          <div class="panel control-panel">
+            <div class="section-heading"><span class="section-num">02</span><div><h2>Your gains</h2><p>Controller limit is ±10.</p></div></div>
+            <label class="range-control"><span>Kp <output id="kpOut"></output></span><input type="range" id="kp" min="0" max="20" step="0.5" value="1" /></label>
+            <label class="range-control"><span>Ki <output id="kiOut"></output></span><input type="range" id="ki" min="0" max="20" step="0.5" value="0" /></label>
+            <label class="range-control"><span>Kd <output id="kdOut"></output></span><input type="range" id="kd" min="0" max="5" step="0.1" value="0" /></label>
+            <div class="button-row">
+              <button type="button" class="subtle-btn" id="openLoop">Test plant (open loop)</button>
+              <button type="button" class="subtle-btn" id="reveal">Reveal plant</button>
+              <button type="button" class="subtle-btn" id="newPlant">New plant ↻</button>
+            </div>
+            <p class="explain-note" id="plantInfo">Plant hidden. Tip: the open-loop test applies u = 1; the final value is K and the 63% time is τ.</p>
+          </div>
+        </div>
+
+        <div class="analysis-column">
+          <div class="panel plot-panel">
+            <div class="topline"><div><h2 id="plotTitle">Closed-loop response</h2><p>Dashed pink: setpoint. Dotted: overshoot limit and settling deadline.</p></div><span class="live-pill"><span class="pulse"></span> LIVE</span></div>
+            <div class="plot-container" id="yPlot"></div>
+            <div class="chart-legend"><span><i class="key purple"></i> Output y(t)</span><span><i class="key pink dashed"></i> Setpoint / spec limits</span></div>
+          </div>
+          <div class="panel plot-panel"><h2>Control signal u(t)</h2><div class="plot-container" id="uPlot"></div></div>
+        </div>
+      </section>
+
+      <section class="panel metrics-panel">
+        <div class="topline"><div><h2>Score</h2><p>Overshoot 30 · settling 30 · zero steady-state error 40</p></div><span class="info-chip" id="roundChip">Round 1</span></div>
+        <div class="metrics-grid">
+          <div class="metric"><small>OVERSHOOT</small><strong id="mOs">—</strong><span id="vOs"></span></div>
+          <div class="metric"><small>SETTLING TIME</small><strong id="mTs">—</strong><span id="vTs"></span></div>
+          <div class="metric"><small>STEADY-STATE ERROR</small><strong id="mErr">—</strong><span id="vErr"></span></div>
+          <div class="metric"><small>SCORE</small><strong id="mScore">—</strong><span id="vScore"></span></div>
+        </div>
+        <p class="explain-note" id="sessionNote"></p>
+      </section>
+
+      <section class="lower-grid">
+        <div class="panel lesson-panel"><div class="section-heading"><span class="section-num blush">03</span><div><h2>Predict, then check</h2><p>Before moving a slider, say what will happen.</p></div></div>
+          <h3>If we raise Ki by 2 from your current gains, the overshoot will…</h3>
+          <select id="prediction"><option value="increase">increase</option><option value="decrease">decrease</option><option value="same">stay about the same</option></select>
+          <button class="primary-button" id="check" type="button">Check my prediction →</button>
+          <p id="predictionResult"></p></div>
+        <div class="panel"><div class="section-heading"><span class="section-num">04</span><div><h2>How to approach it</h2><p>Same order as P1.</p></div></div>
+          <p>1. Run the open-loop test to estimate K and τ.<br>2. Raise Kp until the response is fast enough.<br>3. Add Ki to remove the steady-state error.<br>4. If the overshoot is too big, lower Ki or add a little Kd.</p></div>
+      </section>
+      <p class="page-footnote">ENCS4380 · PID Control Toolkit · Team 23 · P4 Tuning Challenge · Euler integration (Δt = 0.005 s)</p>
+    </main>
+  </div>
+</body>
+</html>
