@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Team 23 Micromouse PID motor speed control case study, with an illustrative plant model and generated ESP32 code." />
+  <title>My System | Micromouse PID · Team 23</title>
+  <link rel="stylesheet" href="control-p1.css" />
+  <link rel="stylesheet" href="my-system.css" />
+  <script defer src="my-system.js"></script>
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="page-shell">
+    <nav class="nav-bar" aria-label="Navigation">
+      <a class="brand" href="index.html"><span class="brand-mark">✳</span><span>Dynamic <b>Toolkit</b></span></a>
+      <div class="nav-links"><a href="index.html">Home</a><span>/</span><a href="index.html#control">Control</a><span>/</span><b>My System</b></div>
+      <span class="course-pill">ENCS4380 · Team 23</span>
+    </nav>
+
+    <header class="hero my-hero">
+      <div class="hero-copy">
+        <div class="eyebrow">CONTROL TOOLKIT · REAL-WORLD APPLICATION</div>
+        <h1>My <span>System</span><span class="tiny-spark">✦</span></h1>
+        <p>Design and simulate a speed controller for our Micromouse drive motor. Explore the plant model, tune a PI/PID controller, and preview the ESP32 control loop.</p>
+        <div class="hero-pills"><span>⚙ GA12-N20 encoder motor</span><span>◉ Interactive simulation</span><span>✓ Honest assumptions</span></div>
+      </div>
+    </header>
+
+    <div class="notice" role="note"><strong>Model status: illustrative, not measured.</strong> Our hardware has not arrived. The selected motor variant is <b>6 V, 500 RPM</b>; plant gain and time constant below are preliminary assumptions, not results of an encoder step test. Re-identify the model once the hardware arrives.</div>
+
+    <main>
+      <section class="overview-grid" aria-label="System details">
+        <article class="panel">
+          <div class="section-heading"><span class="section-num">01</span><div><h2>Our Micromouse hardware</h2><p>Parts selected for a two-wheel drive robot</p></div></div>
+          <div class="hardware-grid">
+            <div><small>DRIVE MOTORS</small><strong>2 × GA12-N20</strong><span>6 V · selected 500 RPM variant · Hall encoder</span></div>
+            <div><small>MICROCONTROLLER</small><strong>ESP32</strong><span>30-pin development board</span></div>
+            <div><small>MOTOR DRIVER</small><strong>DRV8833</strong><span>Dual H-bridge; one channel per motor</span></div>
+            <div><small>OTHER SENSORS</small><strong>VL53L0X + MPU6050</strong><span>Maze sensing and orientation; not used in this speed-loop model</span></div>
+          </div>
+          <p class="subnote">The simulation models <b>one drive motor</b>. The robot will ultimately run one speed-control loop for each wheel. The LM2596 regulator is in the parts list, but power wiring and electrical suitability must be checked before real testing.</p>
+        </article>
+        <article class="panel">
+          <div class="section-heading"><span class="section-num">02</span><div><h2>Plant and its source</h2><p>First-order speed model used for the exercise</p></div></div>
+          <div class="formula-card"><small>OPEN-LOOP TRANSFER FUNCTION</small><div class="math-line">G(s) = K / (τs + 1)</div><p>Input: PWM duty fraction 0–1. Output: shaft speed (RPM).</p></div>
+          <div class="source-lines">
+            <p><b>K ≈ 500 RPM / unit PWM</b> — assumed ideal linear scaling from the selected 500 RPM listing at rated 6 V, without load; not a measured motor gain.</p>
+            <p><b>τ = 0.25 s</b> — illustrative assumption. Actual τ cannot be read from the 500 RPM rating and must be found from a PWM step test.</p>
+            <p><b>Identification later:</b> log PWM and encoder RPM; estimate K = Δsteady RPM / ΔPWM and τ at 63.2% of the step response.</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="main-grid" aria-label="PID design and simulation">
+        <div class="settings-column">
+          <div class="panel">
+            <div class="section-heading"><span class="section-num">03</span><div><h2>Plant and specification</h2><p>Change assumptions or set the speed target</p></div></div>
+            <div class="parameter-grid model-fields">
+              <label class="number-control">K · gain (RPM / PWM)<input type="number" id="K" min="50" max="1500" step="10" value="500" /><small>Initially based on selected 500 RPM variant</small></label>
+              <label class="number-control">τ · time constant (s)<input type="number" id="tau" min="0.02" max="3" step="0.01" value="0.25" /><small>Assumed until measured</small></label>
+              <label class="number-control">Target speed (RPM)<input type="number" id="sp" min="10" max="1000" step="10" value="250" /><small>Example: half the assumed maximum speed</small></label>
+              <label class="number-control">Sampling time (ms)<input type="number" id="sampleMs" min="5" max="100" step="5" value="10" /><small>Digital controller update interval</small></label>
+            </div>
+            <div class="spec-card"><b>Chosen specification</b><p>Overshoot ≤ 10% · settling time ≤ 2.0 s (±2% band) · final error ≤ 1% of target · PWM between 0 and 100%.</p><p><b>Why:</b> fast, well-damped motor speed tracking can help Micromouse run smoothly and predictably without excessive overshoot.</p></div>
+          </div>
+
+          <div class="panel">
+            <div class="section-heading"><span class="section-num">04</span><div><h2>Tune the speed controller</h2><p>Defaults are a PI design for ζ = 0.7</p></div></div>
+            <div class="gain-fields">
+              <label class="number-control">Kp <input type="number" id="kp" min="0" max="1" step="0.0001" value="0.0029" /></label>
+              <label class="number-control">Ki <input type="number" id="ki" min="0" max="2" step="0.0005" value="0.0245" /></label>
+              <label class="number-control">Kd <input type="number" id="kd" min="0" max="0.05" step="0.0001" value="0" /></label>
+            </div>
+            <div class="autotune">
+              <label class="range-control"><span>Requested damping ratio (ζ) <output id="zetaOut">0.70</output></span><input type="range" id="targetZeta" min="0.6" max="0.8" step="0.05" value="0.7" /></label>
+              <label class="range-control"><span>Natural frequency (ωn) <output id="wnOut">7.0 rad/s</output></span><input type="range" id="targetWn" min="4" max="12" step="0.5" value="7" /></label>
+            </div>
+            <button class="primary-button full-btn" id="autoTune" type="button">Calculate PI gains for target ζ</button>
+            <button class="outline-button" id="reset" type="button">Reset to example</button>
+            <p id="poleEstimate" class="explain-note" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <div class="analysis-column">
+          <div class="panel plot-panel"><div class="topline"><div><h2>Motor speed response</h2><p>Closed-loop RPM following a step command</p></div><span class="live-pill"><span class="pulse"></span> SIMULATION</span></div><div class="plot-container" id="speedPlot" role="img" aria-label="Simulated speed plotted against reference"></div><div class="chart-legend"><span><i class="key purple"></i>Speed (RPM)</span><span><i class="key pink dashed"></i>Target RPM</span></div></div>
+          <div class="panel plot-panel"><div class="topline"><div><h2>PWM control effort</h2><p>Clamped to 0–100% as required</p></div><span class="info-chip">LIMIT 0–100%</span></div><div class="plot-container" id="pwmPlot" role="img" aria-label="Simulated control signal as PWM duty percent"></div><div class="chart-legend"><span><i class="key purple"></i>PWM %</span><span><i class="key pink dashed"></i>100% limit</span></div></div>
+        </div>
+      </section>
+
+      <section class="panel metrics-panel"><div class="topline"><div><h2>Performance against our spec</h2><p>Measured from the 5-second simulated response (not hardware)</p></div><span class="info-chip" id="statusChip">SIMULATED</span></div>
+        <div class="metrics-grid">
+          <div class="metric"><small>RISE TIME · 10–90%</small><strong id="mRise">—</strong><span>Simulated</span></div>
+          <div class="metric"><small>OVERSHOOT</small><strong id="mOvershoot">—</strong><span id="vOvershoot">Spec ≤ 10%</span></div>
+          <div class="metric"><small>SETTLING TIME</small><strong id="mSettling">—</strong><span id="vSettling">Spec ≤ 2.0 s</span></div>
+          <div class="metric"><small>END ERROR</small><strong id="mError">—</strong><span id="vError">Spec ≤ 1%</span></div>
+        </div>
+        <p class="explain-note">End error is the value at 5 s, used as a steady-state <i>estimate</i>. The linear damping estimate only applies without saturation or sampling effects; the plots and metrics include both.</p>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel lesson-panel"><div class="section-heading"><span class="section-num blush">05</span><div><h2>Predict, then check</h2><p>Explore the effect of integral action</p></div></div>
+          <h3>What happens to overshoot if Ki increases by 50%?</h3>
+          <label class="select-label" for="prediction">YOUR PREDICTION</label><select id="prediction"><option value="decrease">It decreases</option><option value="increase">It increases</option><option value="same">It remains about the same</option></select>
+          <button class="primary-button predict-btn" id="checkPrediction" type="button">Check my prediction →</button><p class="prediction-result" id="predictionResult" aria-live="polite"></p>
+        </article>
+        <article class="panel"><div class="section-heading"><span class="section-num">06</span><div><h2>Design equations</h2><p>PI controller applied to a first-order plant</p></div></div>
+          <div class="formula-card"><small>WITHOUT SATURATION / SAMPLING</small><div class="math-line formula-small">τs² + (1 + KKp)s + KKi = 0</div></div>
+          <p class="math-explain">Choose ζ = 0.7 (inside the recommended 0.6–0.8 range). For PI (Kd = 0), select a natural frequency ωn and compute:</p>
+          <div class="mini-equation">Kp = (2ζωnτ − 1) / K</div><div class="mini-equation">Ki = (τωn²) / K</div>
+          <p class="subnote">This is an illustrative continuous-time pole design; real PWM limits, encoder quantization, and digital sampling can alter the response.</p>
+        </article>
+      </section>
+
+      <section class="panel code-panel"><div class="topline"><div><h2>Generated ESP32 / DRV8833 Arduino sketch</h2><p>One forward-direction motor speed loop with encoder feedback; values update as the controls change</p></div><button class="outline-button copy-btn" id="copyCode" type="button">Copy code</button></div>
+        <p class="explain-note"><b>Before uploading to hardware:</b> set the actual encoder counts per <i>output shaft</i> revolution, verify ESP32-safe encoder voltage, motor driver supply / nSLEEP, and chosen GPIO wiring. The sketch intentionally keeps the motor off until a valid count is configured. Designed for Arduino-ESP32 3.x LEDC API.</p>
+        <pre class="code-output"><code id="arduinoCode"></code></pre>
+      </section>
+      <p class="page-footnote">ENCS4380 · PID Control Toolkit · Team 23 · My System · illustrative first-order model + sampled PI/PID</p>
+    </main>
+  </div>
+</body>
+</html>
